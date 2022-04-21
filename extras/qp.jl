@@ -10,8 +10,8 @@ struct QP
     d::Array{Float64,1}
     AAt::Array{Float64,2}
 
-    ∇f::Array{Float64,1}
-    ∇2f::Array{Float64,2}
+    ∇L::Array{Float64,1}
+    ∇2L::Array{Float64,2}
     α::Float64
    
     x::Array{Float64,1}
@@ -40,19 +40,27 @@ function update_penalty!(qp::QP)
     ρ = ρ*ϕ
 end
 function newton_step!(qp::QP)
-    Δx .= -∇2f\∇f
-    x .= x.+Δx
+    x .= x.-∇2L\∇L
 end
 function linesearch!(qp::QP)
 
 end
 function minimize_augmented_lagrangian!(qp::QP)
-    
+    update_I!()
+    while (tol)
+        update_derivatives!()
+        newton_step!(qp)     
+    end
+
 end
+
 function solve!(qp::QP)
-    minimize_augmented_lagrangian!(qp)
-    update_dual!(qp)
-    update_penalty!(qp)
+    while 
+        minimize_augmented_lagrangian!(qp)
+        update_dual!(qp)
+        update_penalty!(qp)
+        check_convergence!(qp)        
+    end
 end
 
 let
