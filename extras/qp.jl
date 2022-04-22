@@ -1,4 +1,5 @@
 using LinearAlgebra
+using BenchmarkTools
 
 struct QP
     # problem data
@@ -49,14 +50,15 @@ function update_Iρ!(qp::QP)
 end
 function update_derivatives!(qp::QP)
     qp.∇L .= qp.Q * qp.x + qp.q + qp.A' * (qp.λ + qp.ρ * (qp.A * qp.x - qp.b)) + qp.C' * (qp.μ + qp.Iρ * (qp.C * qp.x - qp.d))
-    qp.∇2L .= qp.Q + qp.ρ * qp.A * qp.A' + qp.C' * qp.Iρ * qp.C
+    qp.∇2L .= qp.Q + qp.ρ .* qp.A' * qp.A + qp.C' * qp.Iρ * qp.C
 end
 function minimize_augmented_lagrangian!(qp::QP)
     update_Iρ!(qp)
+    println(qp.x)
     while (norm(qp.∇L) > qp.aug_lag_tol)
         update_derivatives!(qp)
         newton_step!(qp)
-        print(qp.x)
+        println(qp.x)
     end
     print(qp.∇L)
 end
@@ -80,9 +82,9 @@ let
     #Q = sparse(Q)
     q = zeros(n)
     Q = [1 0;0 2]
-    q = [1;1]
-    A = zeros(n,n)
-    b = zeros(n)
+    q = [0;0]
+    A = [1 0]
+    b = [3]
     C = zeros(n,n)
     d = zeros(n)
 
