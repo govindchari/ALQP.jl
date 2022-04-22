@@ -1,6 +1,7 @@
 using LinearAlgebra
 using BenchmarkTools
 using Printf
+using OSQP
 
 mutable struct QP
     # problem data
@@ -71,9 +72,12 @@ function logging(qp::QP, iter)
 
     return nothing
 end
-
-function solve!(qp::QP)
+function initialize!(qp::QP)
     update_derivatives!(qp)
+    update_Iρ!(qp)
+end
+function solve!(qp::QP)
+    initialize!(qp)
     println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
     println("-------------------------------------------------\n")
     for i = 1:10
@@ -90,17 +94,16 @@ end
 
 let
     n = 2
-    Q = randn(n, n)
-    Q = Q' * Q
-    #Q = sparse(Q)
-    q = zeros(n)
-    Q = [1 0; 0 2]
-    q = [0; 0]
-    A = [0 1]
-    b = [3]
-    C = zeros(n, n)
+    Q = [1 0;0 1]
+    q = [-20;-10]
+    A = zeros(n,n)
+    b = zeros(n)
+    C = zeros(n,n)
     d = zeros(n)
 
-    qp = QP(Q, q, A, b, C, d)
+    qp = QP(Q,q,A,b,C,d)
+
+    # @btime solveqp!($qp::QP)
     solve!(qp)
+    println(qp.x)
 end
