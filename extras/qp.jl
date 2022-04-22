@@ -32,14 +32,15 @@ mutable struct QP
         Iρ = I(length(d))
         ∇L = zeros(length(q))
         ∇2L = zeros(length(q), length(q))
-        ϕ = 10.0
-        aug_lag_tol = 1e-6
+        ϕ = 1.0
+        aug_lag_tol = 1e-8
         new(Q, q, A, b, C, d, ∇L, ∇2L, Iρ, x, λ, μ, ρ, ϕ, aug_lag_tol)
     end
 end
 function update_dual!(qp::QP)
-    qp.λ .= qp.λ .+ qp.ρ * (qp.A * qp.x - qp.b)
-    qp.μ .= max.(0, qp.μ .+ qp.ρ * (qp.C * qp.x - qp.d))
+    qp.λ .= qp.λ .+ qp.ρ .* (qp.A * qp.x - qp.b)
+    qp.μ .= max.(0, qp.μ .+ qp.ρ .* (qp.C * qp.x - qp.d))
+    #qp.μ .= qp.μ + qp.Iρ * (qp.C * qp.x - qp.d)
 end
 function update_penalty!(qp::QP)
     qp.ρ = qp.ρ * qp.ϕ
@@ -48,7 +49,7 @@ function newton_step!(qp::QP)
     qp.x .= qp.x .- qp.∇2L \ qp.∇L
 end
 function update_Iρ!(qp::QP)
-    qp.Iρ .= qp.ρ * Diagonal(qp.C * qp.x - qp.d .> zeros(length(qp.d)))
+    qp.Iρ .= qp.ρ *  Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0)) 
 end
 function update_derivatives!(qp::QP)
     qp.∇L .= qp.Q * qp.x + qp.q + qp.A' * (qp.λ + qp.ρ * (qp.A * qp.x - qp.b)) + qp.C' * (qp.μ + qp.Iρ * (qp.C * qp.x - qp.d))
@@ -79,63 +80,41 @@ function initialize!(qp::QP)
     update_derivatives!(qp)
     update_Iρ!(qp)
 end
+
 function solve!(qp::QP)
-    initialize!(qp)
-    println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
-    println("-------------------------------------------------\n")
+    solve!(qp,false)
+end
+function solve!(qp::QP,verbose::Bool)
+    if verbose
+        println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
+        println("-------------------------------------------------\n")
+    end
     for i = 1:10
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
         update_penalty!(qp)
-
-        logging(qp, i)
+        if verbose
+            logging(qp, i)
+        end
         #check_convergence!(qp)
     end
-
 end
 
 let
-    #=
     n = 2
     Q = [1 0;0 1]
-    q = [-20;-10]
+    q = zeros(n)
+
     A = zeros(n,n)
     b = zeros(n)
-    C = zeros(n,n)
-    d = zeros(n)
+    C = [1 1]
+    d = [-5]
 
     Q = sparse(Q)
     A = sparse(A)
     C = sparse(C)
 
     qp = QP(Q,q,A,b,C,d)
+    @btime solve!($qp)
 
-    #@btime solveqp!($qp::QP)
-    solve!(qp)
-    println(qp.x)
-    =#
-    n = 10
-    Q = randn(n, n)
-    Q = Q' * Q
-    Q = sparse(Q)
-    q = randn(n)
-    A = spzeros(0, n)
-    b = []
-    G = sparse([I(n); -I(n)])
-    h = [ones(n); zeros(n)]
-
-    qp = QP(Q, q, A, b, G, h)
-    solve!(qp)
-    println(qp.x)
-    display(qp.Iρ)
-
-    # @btime solveqp!($qp::QP)
-
-    #@btime results = OSQP.solve!($m)
-
-    #=
-    m = OSQP.Model()
-    OSQP.setup!(m; P = Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n))
-    results = OSQP.solve!(m)
-    =#
 end
