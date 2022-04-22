@@ -1,20 +1,20 @@
-using LinearAlgebra
+using LinearAlgebra, SparseArrays
 using BenchmarkTools
 using Printf
 using OSQP
 
 mutable struct QP
     # problem data
-    Q::Array{Float64,2}
+    Q::SparseMatrixCSC{Float64,Int64}
     q::Array{Float64,1}
-    A::Array{Float64,2}
+    A::SparseMatrixCSC{Float64,Int64}
     b::Array{Float64,1}
-    C::Array{Float64,2}
+    C::SparseMatrixCSC{Float64,Int64}
     d::Array{Float64,1}
 
     ∇L::Array{Float64,1}
     ∇2L::Array{Float64,2}
-    Iρ::Array{Float64,2}
+    Iρ::SparseMatrixCSC{Float64,Int64}
 
     x::Array{Float64,1}
     λ::Array{Float64,1}
@@ -101,9 +101,13 @@ let
     C = zeros(n,n)
     d = zeros(n)
 
+    Q = sparse(Q)
+    A = sparse(A)
+    C = sparse(C)
+
     qp = QP(Q,q,A,b,C,d)
 
-    # @btime solveqp!($qp::QP)
+    #@btime solveqp!($qp::QP)
     solve!(qp)
     println(qp.x)
 end
