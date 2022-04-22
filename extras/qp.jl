@@ -1,7 +1,7 @@
 using LinearAlgebra
 using BenchmarkTools
 
-struct QP
+mutable struct QP
     # problem data
     Q::Array{Float64,2}
     q::Array{Float64,1}
@@ -53,27 +53,26 @@ function update_derivatives!(qp::QP)
     qp.∇2L .= qp.Q + qp.ρ .* qp.A' * qp.A + qp.C' * qp.Iρ * qp.C
 end
 function minimize_augmented_lagrangian!(qp::QP)
-    update_Iρ!(qp)
-    println(qp.x)
     while (norm(qp.∇L) > qp.aug_lag_tol)
         update_derivatives!(qp)
         newton_step!(qp)
-        println(qp.x)
     end
-    print(qp.∇L)
 end
 
 function solve!(qp::QP)
     update_derivatives!(qp)
-    minimize_augmented_lagrangian!(qp)
-    #=
-    while (!converged)
+    
+    for i=1:10
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
-        update_penalty!(qp)
-        check_convergence!(qp)
+        print(qp.λ)
+        #update_penalty!(qp)
+        update_derivatives!(qp)
+        update_Iρ!(qp)
+        println(qp.x)
+        #check_convergence!(qp)
     end
-    =#
+    
 end
 
 let
@@ -83,7 +82,7 @@ let
     q = zeros(n)
     Q = [1 0;0 2]
     q = [0;0]
-    A = [1 0]
+    A = [0 1]
     b = [3]
     C = zeros(n,n)
     d = zeros(n)
