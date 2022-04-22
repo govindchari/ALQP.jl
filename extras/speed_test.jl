@@ -49,7 +49,7 @@ function newton_step!(qp::QP)
     qp.x .= qp.x .- qp.∇2L \ qp.∇L
 end
 function update_Iρ!(qp::QP)
-    qp.Iρ .= qp.ρ * Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0))
+    qp.Iρ .= qp.ρ *  Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0)) 
 end
 function update_derivatives!(qp::QP)
     qp.∇L .= qp.Q * qp.x + qp.q + qp.A' * (qp.λ + qp.ρ * (qp.A * qp.x - qp.b)) + qp.C' * (qp.μ + qp.Iρ * (qp.C * qp.x - qp.d))
@@ -82,9 +82,9 @@ function initialize!(qp::QP)
 end
 
 function solve!(qp::QP)
-    solve!(qp, false)
+    solve!(qp,false)
 end
-function solve!(qp::QP, verbose::Bool)
+function solve!(qp::QP,verbose::Bool)
     if verbose
         println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
         println("-------------------------------------------------\n")
@@ -119,18 +119,17 @@ let
     @btime solve!($qp)
     =#
     n = 10
-    Q = randn(n, n)
-    Q = Q' * Q
+    Q = randn(n,n);Q = Q'*Q
     Q = sparse(Q)
     q = zeros(n)
-    A = spzeros(0, n)
+    A = spzeros(0,n)
     b = []
-    G = sparse([I(n); -I(n)])
-    h = [ones(n); zeros(n)]
+    G = sparse([I(n);-I(n)])
+    h = [ones(n);zeros(n)]
 
-    qp = QP(Q, q, A, b, G, h)
+    qp = QP(Q,q,A,b,G,h)
     m = OSQP.Model()
-    OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
+    OSQP.setup!(m; P = Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose = false)
 
     #Benchmarking
     println("OSQP Benchmark:")
@@ -138,5 +137,4 @@ let
 
     println("ALQP Benchmark:")
     @btime solve!($qp)
-
 end
