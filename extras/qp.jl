@@ -1,5 +1,6 @@
 using LinearAlgebra
 using BenchmarkTools
+using Printf
 
 mutable struct QP
     # problem data
@@ -58,35 +59,48 @@ function minimize_augmented_lagrangian!(qp::QP)
         newton_step!(qp)
     end
 end
+function logging(qp::QP, iter)
+
+    J = 0.5 * qp.x' * qp.Q * qp.x + dot(qp.q, qp.x)
+    gap = dot(qp.C * qp.x - qp.d, qp.μ)
+    eq_res = norm(qp.A * qp.x - qp.b)
+
+
+    @printf("%3d   %10.3e  %9.2e  %9.2e\n",
+        iter, J, gap, eq_res)
+
+    return nothing
+end
 
 function solve!(qp::QP)
     update_derivatives!(qp)
-    
-    for i=1:10
+    println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
+    println("-------------------------------------------------\n")
+    for i = 1:10
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
-        print(qp.λ)
-        #update_penalty!(qp)
+        update_penalty!(qp)
         update_derivatives!(qp)
         update_Iρ!(qp)
-        println(qp.x)
+        logging(qp, i)
         #check_convergence!(qp)
     end
-    
+
 end
 
 let
     n = 2
-    Q = randn(n,n);Q = Q'*Q
+    Q = randn(n, n)
+    Q = Q' * Q
     #Q = sparse(Q)
     q = zeros(n)
-    Q = [1 0;0 2]
-    q = [0;0]
+    Q = [1 0; 0 2]
+    q = [0; 0]
     A = [0 1]
     b = [3]
-    C = zeros(n,n)
+    C = zeros(n, n)
     d = zeros(n)
 
-    qp = QP(Q,q,A,b,C,d)
+    qp = QP(Q, q, A, b, C, d)
     solve!(qp)
 end
