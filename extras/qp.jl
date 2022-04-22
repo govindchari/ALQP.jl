@@ -39,7 +39,7 @@ mutable struct QP
 end
 function update_dual!(qp::QP)
     qp.λ .= qp.λ .+ qp.ρ * (qp.A * qp.x - qp.b)
-    qp.μ .= max.(0, qp.μ + qp.ρ * (qp.C * qp.x - qp.d))
+    qp.μ .= max.(0, qp.μ .+ qp.ρ * (qp.C * qp.x - qp.d))
 end
 function update_penalty!(qp::QP)
     qp.ρ = qp.ρ * qp.ϕ
@@ -57,8 +57,11 @@ end
 function minimize_augmented_lagrangian!(qp::QP)
     while (norm(qp.∇L) > qp.aug_lag_tol)
         update_derivatives!(qp)
+        update_Iρ!(qp)
         newton_step!(qp)
     end
+    update_derivatives!(qp)
+    update_Iρ!(qp)
 end
 function logging(qp::QP, iter)
 
@@ -84,8 +87,7 @@ function solve!(qp::QP)
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
         update_penalty!(qp)
-        update_derivatives!(qp)
-        update_Iρ!(qp)
+
         logging(qp, i)
         #check_convergence!(qp)
     end
@@ -93,6 +95,7 @@ function solve!(qp::QP)
 end
 
 let
+    #=
     n = 2
     Q = [1 0;0 1]
     q = [-20;-10]
@@ -110,4 +113,29 @@ let
     #@btime solveqp!($qp::QP)
     solve!(qp)
     println(qp.x)
+    =#
+    n = 10
+    Q = randn(n, n)
+    Q = Q' * Q
+    Q = sparse(Q)
+    q = randn(n)
+    A = spzeros(0, n)
+    b = []
+    G = sparse([I(n); -I(n)])
+    h = [ones(n); zeros(n)]
+
+    qp = QP(Q, q, A, b, G, h)
+    solve!(qp)
+    println(qp.x)
+    display(qp.Iρ)
+
+    # @btime solveqp!($qp::QP)
+
+    #@btime results = OSQP.solve!($m)
+
+    #=
+    m = OSQP.Model()
+    OSQP.setup!(m; P = Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n))
+    results = OSQP.solve!(m)
+    =#
 end
