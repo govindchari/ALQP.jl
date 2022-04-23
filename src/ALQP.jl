@@ -10,4 +10,6 @@ include("augmented-lagrangian.jl")
 include("solver.jl")
 include("utils.jl")
 
+export QP, solve!
+
 end # module

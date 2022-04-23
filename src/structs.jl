@@ -53,9 +53,11 @@ struct QP
         ∇L = zeros(length(q))
         ∇2L = zeros(length(q), length(q))
         ϕ = 1.0
+        At = A'
+        Ct = C'
 
         tol = TOLERANCE()
         cache = CACHE(neq, nineq, n)
-        new(Q, q, A, b, C, d, A', C', ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache)
+        new(Q, q, A, b, C, d, At, Ct, ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache)
     end
 end

@@ -39,8 +39,8 @@ mutable struct QP
 end
 function update_dual!(qp::QP)
     qp.λ .= qp.λ .+ qp.ρ .* (qp.A * qp.x - qp.b)
-    qp.μ .= max.(0, qp.μ .+ qp.ρ .* (qp.C * qp.x - qp.d))
-    #qp.μ .= qp.μ + qp.Iρ * (qp.C * qp.x - qp.d)
+    #qp.μ .= max.(0, qp.μ .+ qp.ρ .* (qp.C * qp.x - qp.d))
+    qp.μ .= qp.μ + qp.Iρ * (qp.C * qp.x - qp.d)
 end
 function update_penalty!(qp::QP)
     qp.ρ = qp.ρ * qp.ϕ
@@ -101,7 +101,7 @@ function solve!(qp::QP, verbose::Bool)
 end
 
 let
-    #=
+    
     n = 2
     Q = [1 0;0 1]
     q = zeros(n)
@@ -116,8 +116,10 @@ let
     C = sparse(C)
 
     qp = QP(Q,q,A,b,C,d)
-    @btime solve!($qp)
-    =#
+    solve!(qp, true)
+    #@btime solve!($qp)
+    
+    #=
     n = 10
     Q = randn(n, n)
     Q = Q' * Q
@@ -131,12 +133,13 @@ let
     qp = QP(Q, q, A, b, G, h)
     m = OSQP.Model()
     OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
-
+    solve!(qp,true)
     #Benchmarking
     println("OSQP Benchmark:")
     @btime OSQP.solve!($m)
 
     println("ALQP Benchmark:")
     @btime solve!($qp)
+    =#
 
 end
