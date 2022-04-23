@@ -1,2 +1,2 @@
 # ALQP.jl
-An augmented Lagrangian quadratic program solver written in pure Julia. 
+An allocation-free augmented Lagrangian quadratic program solver written in pure Julia. 
