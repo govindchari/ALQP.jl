@@ -36,9 +36,9 @@ m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
 
 #Benchmarking
-#println("OSQP Benchmark:")
-#@btime OSQP.solve!($m)
+println("OSQP Benchmark:")
+@btime OSQP.solve!($m)
 
 println("ALQP Benchmark:")
 @btime solve!($qp)
-#solve!(qp)
+solve!(qp)
