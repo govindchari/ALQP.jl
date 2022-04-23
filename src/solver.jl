@@ -7,7 +7,7 @@ end
 function solve!(qp::QP, verbose::Bool)
     initialize!(qp)
     if verbose
-        println("iter     objv       |Ax-b|    |Cx-d|  Complementarity\n")
+        println("iter     objv       |Ax-b|    ineq res  comp slackness\n")
         println("-------------------------------------------------------------\n")
     end
     while (!qp.converged && qp.iter < qp.tol.max_iter)
@@ -20,5 +20,5 @@ function solve!(qp::QP, verbose::Bool)
             logging(qp)
         end
     end
-    @assert qp.iter < qp.tol.max_iter
+    @assert qp.iter < qp.tol.max_iter "Max Iterations Reached"
 end
