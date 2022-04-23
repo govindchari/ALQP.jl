@@ -1,23 +1,10 @@
 using ALQP
 using LinearAlgebra
 using SparseArrays
+using OSQP
+using BenchmarkTools
 
 #=
-n = 10
-Q = randn(n, n)
-Q = Q' * Q
-Q = sparse(Q)
-q = zeros(n)
-A = spzeros(0, n)
-b = []
-G = sparse([I(n); -I(n)])
-h = [ones(n); zeros(n)]
-
-qp = QP(Q, q, A, b, G, h)
-
-solve!(qp, true) 
-=#
-
 n = 2
 Q = [1 0;0 1]
 q = zeros(n)
@@ -32,10 +19,19 @@ A = sparse(A)
 C = sparse(C)
 
 qp = QP(Q,q,A,b,C,d)
-solve!(qp, true)
+=#
 
+n = 10
+Q = randn(n, n)
+Q = Q' * Q
+Q = sparse(Q)
+q = zeros(n)
+A = spzeros(0, n)
+b = []
+G = sparse([I(n); -I(n)])
+h = [ones(n); zeros(n)]
 
-#=
+qp = QP(Q, q, A, b, G, h)
 m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
 
@@ -45,4 +41,3 @@ println("OSQP Benchmark:")
 
 println("ALQP Benchmark:")
 @btime solve!($qp)
-=#
