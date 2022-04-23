@@ -20,4 +20,5 @@ function solve!(qp::QP, verbose::Bool)
             logging(qp)
         end
     end
+    @assert qp.iter < qp.tol.max_iter
 end
