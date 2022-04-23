@@ -1,13 +1,13 @@
-function update_Iρ!(qp::QP)    
+function update_Iρ!(qp::QP)
     c = qp.cache
     #qp.Iρ .= qp.ρ * Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0))
     mul!(c.c_ineq, qp.C, qp.x)
     @. c.c_ineq = c.c_ineq - qp.d
-    for i=1:length(c.c_ineq)
+    for i = 1:length(c.c_ineq)
         if (c.c_ineq[i] >= 0 || qp.μ[i] != 0)
-            qp.Iρ[i,i] = qp.ρ
+            qp.Iρ[i, i] = qp.ρ
         else
-            qp.Iρ[i,i] = 0
+            qp.Iρ[i, i] = 0
         end
     end
 end
@@ -15,7 +15,7 @@ function update_dual!(qp::QP)
     c = qp.cache
 
     #qp.λ .= qp.λ .+ qp.ρ .* (qp.A * qp.x - qp.b)
-    mul!(c.c_eq, qp.A, qp.x) 
+    mul!(c.c_eq, qp.A, qp.x)
     @. c.c_eq = c.c_eq - qp.b
     @. qp.λ = qp.λ + qp.ρ * c.c_eq
 
@@ -93,5 +93,5 @@ function check_convergence!(qp::QP)
     end
     qp.ineq_res = norm(c.c_ineq)
 
-    qp.converged = (qp.eq_res < qp.tol.eq_feas) && (qp.ineq_res < qp.tol.ineq_feas) && (qp.complementarity_res < qp.tol.complementarity)
+    qp.converged = (qp.eq_res < sqrt(length(qp.b)) * qp.tol.eq_feas) && (qp.ineq_res < sqrt(length(qp.d)) * qp.tol.ineq_feas) && (qp.complementarity_res < sqrt(length(qp.d)) * qp.tol.complementarity)
 end
