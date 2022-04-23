@@ -23,7 +23,6 @@ solve!(qp, true)
 println(qp.x)
 
 
-
 #=
 n = 10
 Q = randn(n, n)

@@ -7,15 +7,17 @@ end
 function solve!(qp::QP, verbose::Bool)
     initialize!(qp)
     if verbose
-        println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
-        println("-------------------------------------------------\n")
+        println("iter     objv       |Ax-b|    |Cx-d|  Complementarity\n")
+        println("-------------------------------------------------------------\n")
     end
-    for i = 1:10
+    while (!qp.converged && qp.iter < qp.tol.max_iter)
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
         update_penalty!(qp)
+        check_convergence!(qp)
+        qp.iter = qp.iter + 1
         if verbose
-            logging(qp, i)
+            logging(qp)
         end
     end
 end

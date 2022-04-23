@@ -7,9 +7,9 @@ struct TOLERANCE
 
     function TOLERANCE()
         aug_lag = 1e-8
-        eq_feas = 1e-6
-        ineq_feas = 1e-6
-        complementarity = 1e-2
+        eq_feas = 1e-3
+        ineq_feas = 1e-3
+        complementarity = 1e-3
         max_iter = 100
         new(aug_lag, eq_feas, ineq_feas, complementarity, max_iter)
     end
@@ -41,6 +41,13 @@ mutable struct QP
     tol::TOLERANCE
     cache::CACHE
 
+    iter::Int64
+    cost::Float64
+    eq_res::Float64
+    ineq_res::Float64
+    complementarity_res::Float64
+    converged::Bool
+
     function QP(Q, q, A, b, C, d)
         n = length(q)
         neq = length(b)
@@ -59,6 +66,6 @@ mutable struct QP
 
         tol = TOLERANCE()
         cache = CACHE(neq, nineq, n)
-        new(Q, q, A, b, C, d, At, Ct, Matrix(C), ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache)
+        new(Q, q, A, b, C, d, At, Ct, Matrix(C), ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache, 0, typemax(Float64),typemax(Float64), typemax(Float64), typemax(Float64), false)
     end
 end

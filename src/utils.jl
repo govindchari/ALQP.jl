@@ -59,14 +59,39 @@ end
 function update_penalty!(qp::QP)
     qp.ρ = qp.ρ * qp.ϕ
 end
-function logging(qp::QP, iter)
+function logging(qp::QP)
+    @printf("%3d   %10.3e  %9.2e  %9.2e  %9.2e\n",
+        qp.iter, qp.cost, qp.eq_res, qp.ineq_res, qp.complementarity_res)
+end
+function check_convergence!(qp::QP)
+    c = qp.cache
+    #J = 0.5 * qp.x' * qp.Q * qp.x + dot(qp.q, qp.x)
+    mul!(c.c_n1, qp.Q, qp.x)
+    qp.cost = 0.5 * dot(qp.x, c.c_n1) + dot(qp.x, qp.q)
 
-    J = 0.5 * qp.x' * qp.Q * qp.x + dot(qp.q, qp.x)
-    gap = dot(qp.C * qp.x - qp.d, qp.μ)
-    eq_res = norm(qp.A * qp.x - qp.b)
+    #eq_res = norm(qp.A * qp.x - qp.b)
+    mul!(c.c_eq, qp.A, qp.x)
+    @. c.c_eq = c.c_eq - qp.b
+    qp.eq_res = norm(c.c_eq)
 
+    mul!(c.c_ineq, qp.C, qp.x)
+    @. c.c_ineq = c.c_ineq - qp.d
 
-    @printf("%3d   %10.3e  %9.2e  %9.2e\n",
-        iter, J, gap, eq_res)
+    for i = 1:length(qp.d)
+        if (c.c_ineq[i] < 0)
+            c.c_ineq2[i] = -c.c_ineq[i] * qp.μ[i]
+        else
+            c.c_ineq2[i] = -c.c_ineq[i] * qp.μ[i]
+        end
+    end
+    qp.complementarity_res = norm(c.c_ineq2)
 
+    for i = 1:length(qp.d)
+        if (c.c_ineq[i] < 0)
+            c.c_ineq[i] = 0
+        end
+    end
+    qp.ineq_res = norm(c.c_ineq)
+
+    qp.converged = (qp.eq_res < qp.tol.eq_feas) && (qp.ineq_res < qp.tol.ineq_feas) && (qp.complementarity_res < qp.tol.complementarity)
 end
