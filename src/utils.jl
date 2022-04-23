@@ -17,7 +17,6 @@ function update_dual!(qp::QP)
 end
 function update_derivatives!(qp::QP)
     c = qp.cache
-
     # qp.∇L
     # Q*x
     mul!(c.c_n1, qp.Q, qp.x)
@@ -41,7 +40,7 @@ function update_derivatives!(qp::QP)
 
     #qp.∇2L
     # qp.C' * qp.Iρ * qp.C
-    mul!(c.c_ineq_n, qp.Iρ, qp.C)
+    mul!(c.c_ineq_n, qp.Iρ, qp.Cd)
     mul!(c.c_n_n, qp.Ct, c.c_ineq_n)
 
     #qp.∇2L .= qp.Q + qp.ρ .* qp.A' * qp.A + qp.C' * qp.Iρ * qp.C

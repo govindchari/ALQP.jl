@@ -25,6 +25,7 @@ mutable struct QP
 
     At::SparseMatrixCSC{Float64,Int64}
     Ct::SparseMatrixCSC{Float64,Int64}
+    Cd::Array{Float64,2}
 
     ∇L::Array{Float64,1}
     ∇2L::Array{Float64,2}
@@ -58,6 +59,6 @@ mutable struct QP
 
         tol = TOLERANCE()
         cache = CACHE(neq, nineq, n)
-        new(Q, q, A, b, C, d, At, Ct, ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache)
+        new(Q, q, A, b, C, d, At, Ct, Matrix(C), ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache)
     end
 end

@@ -6,6 +6,8 @@ function solve!(qp::QP)
     solve!(qp, false)
 end
 function solve!(qp::QP, verbose::Bool)
+    update_derivatives!(qp)
+    #=
     if verbose
         println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
         println("-------------------------------------------------\n")
@@ -18,4 +20,5 @@ function solve!(qp::QP, verbose::Bool)
             logging(qp, i)
         end
     end
+    =#
 end
