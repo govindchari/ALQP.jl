@@ -1,4 +1,6 @@
 function update_Iρ!(qp::QP)
+    qp.Iρ .= qp.ρ * Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0))
+    #=
     c = qp.cache
     #qp.Iρ .= qp.ρ * Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0))
     mul!(c.c_ineq, qp.C, qp.x)
@@ -10,6 +12,7 @@ function update_Iρ!(qp::QP)
             qp.Iρ[i,i] = 0
         end
     end
+    =#
 end
 function update_dual!(qp::QP)
     c = qp.cache
