@@ -4,7 +4,8 @@ using SparseArrays
 using OSQP
 using BenchmarkTools
 
-
+# ==============================KNOWN TESTCASE========================================
+#=
 n = 2
 Q = [1 0;0 1]
 q = zeros(n)
@@ -21,7 +22,8 @@ C = sparse(C)
 qp = QP(Q,q,A,b,C,d)
 solve!(qp, true)
 println(qp.x)
-
+=#
+# ==============================ALLOCATION TESTCASE====================================
 
 #=
 n = 10
@@ -44,6 +46,4 @@ println("OSQP Benchmark:")
 
 println("ALQP Benchmark:")
 @btime solve!($qp)
-solve!(qp)
 =#
-
