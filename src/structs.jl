@@ -15,7 +15,7 @@ struct TOLERANCE
     end
 end
 
-struct QP
+mutable struct QP
     Q::SparseMatrixCSC{Float64,Int64}
     q::Array{Float64,1}
     A::SparseMatrixCSC{Float64,Int64}

@@ -2,9 +2,18 @@ function update_Iρ!(qp::QP)
     qp.Iρ .= qp.ρ * Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0))
 end
 function update_dual!(qp::QP)
+    c = qp.cache
+    
     #qp.λ .= qp.λ .+ qp.ρ .* (qp.A * qp.x - qp.b)
-    qp.μ .= max.(0, qp.μ .+ qp.ρ .* (qp.C * qp.x - qp.d))
+    mul!(c.c_eq, qp.A, qp.x) 
+    @. c.c_eq = c.c_eq - qp.b
+    @. qp.λ = qp.λ + qp.ρ * c.c_eq
+
     #qp.μ .= qp.μ + qp.Iρ * (qp.C * qp.x - qp.d)
+    mul!(c.c_ineq, qp.C, qp.x)
+    @. c.c_ineq = c.c_ineq - qp.d
+    mul!(c.c_ineq, qp.Iρ, c.c_ineq)
+    @. qp.μ = qp.μ + c.c_ineq
 end
 function update_derivatives!(qp::QP)
     c = qp.cache
