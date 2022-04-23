@@ -1,13 +1,13 @@
-function update_Iρ!(qp::QP)
+function update_Iρ!(qp::QP)    
     c = qp.cache
     #qp.Iρ .= qp.ρ * Diagonal((qp.C * qp.x - qp.d .>= zeros(length(qp.d)) .|| qp.μ .!= 0))
     mul!(c.c_ineq, qp.C, qp.x)
     @. c.c_ineq = c.c_ineq - qp.d
     for i=1:length(c.c_ineq)
-        if (c.c_ineq[i] < 0 && qp.μ == 0)
-            qp.Iρ[i,i] = 0
-        else
+        if (c.c_ineq[i] >= 0 || qp.μ[i] != 0)
             qp.Iρ[i,i] = qp.ρ
+        else
+            qp.Iρ[i,i] = 0
         end
     end
 end
