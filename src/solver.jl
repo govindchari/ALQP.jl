@@ -1,6 +1,6 @@
-function initialize!()
+function initialize!(qp::QP)
     update_derivatives!(qp)
-    update_Iρ!(qp)
+    #update_Iρ!(qp)
 end
 function solve!(qp::QP)
     solve!(qp, false)

@@ -3,7 +3,7 @@ function update_Iρ!(qp::QP)
 end
 function update_dual!(qp::QP)
     c = qp.cache
-    
+
     #qp.λ .= qp.λ .+ qp.ρ .* (qp.A * qp.x - qp.b)
     mul!(c.c_eq, qp.A, qp.x) 
     @. c.c_eq = c.c_eq - qp.b
@@ -12,8 +12,8 @@ function update_dual!(qp::QP)
     #qp.μ .= qp.μ + qp.Iρ * (qp.C * qp.x - qp.d)
     mul!(c.c_ineq, qp.C, qp.x)
     @. c.c_ineq = c.c_ineq - qp.d
-    mul!(c.c_ineq, qp.Iρ, c.c_ineq)
-    @. qp.μ = qp.μ + c.c_ineq
+    mul!(c.c_ineq2, qp.Iρ, c.c_ineq)
+    @. qp.μ = qp.μ + c.c_ineq2
 end
 function update_derivatives!(qp::QP)
     c = qp.cache
@@ -32,9 +32,9 @@ function update_derivatives!(qp::QP)
     # qp.C' * (qp.μ + qp.Iρ * (qp.C * qp.x - qp.d))
     mul!(c.c_ineq, qp.C, qp.x)
     @. c.c_ineq = c.c_ineq - qp.d
-    mul!(c.c_ineq, qp.Iρ, c.c_ineq)
-    @. c.c_ineq = c.c_ineq + qp.μ
-    mul!(c.c_n3, qp.Ct, c.c_ineq)
+    mul!(c.c_ineq2, qp.Iρ, c.c_ineq)
+    @. c.c_ineq2 = c.c_ineq2 + qp.μ
+    mul!(c.c_n3, qp.Ct, c.c_ineq2)
 
     # qp.∇L .= qp.Q * qp.x + qp.q + qp.A' * (qp.λ + qp.ρ * (qp.A * qp.x - qp.b)) + qp.C' * (qp.μ + qp.Iρ * (qp.C * qp.x - qp.d))
     @. qp.∇L = c.c_n1 + c.c_n2 + c.c_n3
