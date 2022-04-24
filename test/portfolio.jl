@@ -1,8 +1,5 @@
-using ALQP
 using LinearAlgebra
 using SparseArrays
-using OSQP
-using BenchmarkTools
 
 function porfolio(n::Int64)
     Q = rand(n, n)
@@ -22,17 +19,5 @@ function porfolio(n::Int64)
     u = ones(n + 1, 1)
     u = typemax(Float64) * u
     u[n+1] = 1.0
-    return Q, q, A, b, C, d, A_osqp, l[:], u[:]    
+    return Q, q[:], A, b, C, d, A_osqp, l[:], u[:]    
 end
-
-println(maximum(result.x - qp.x))
-#@btime solve!($qp)
-
-#=
-#Benchmarking
-println("OSQP Benchmark:")
-@btime OSQP.solve!($m)
-
-println("ALQP Benchmark:")
-@btime solve!($qp, false)
-=#
