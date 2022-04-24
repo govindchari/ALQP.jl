@@ -11,7 +11,7 @@ function solve!(qp::QP, verbose::Bool)
         println("-------------------------------------------------------------\n")
     end
     while (!qp.converged && qp.iter < qp.tol.max_iter)
-        if (qp.iter<=50 && qp.iter%10 == 0)
+        if (qp.iter<=80 && qp.iter%10 == 0)
             qp.ρ = 10^(qp.iter/10)
         end
         minimize_augmented_lagrangian!(qp)
