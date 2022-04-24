@@ -8,10 +8,10 @@ struct TOLERANCE
 
     function TOLERANCE()
         aug_lag = 1e-12
-        eq_feas = 1e-3
-        ineq_feas = 1e-3
-        complementarity = 1e-3
-        max_iter = 100
+        eq_feas = 1e-4
+        ineq_feas = 1e-4
+        complementarity = 1e-4
+        max_iter = 1000
         new(aug_lag, eq_feas, ineq_feas, complementarity, max_iter)
     end
 end
