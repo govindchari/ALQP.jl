@@ -45,11 +45,11 @@ result = OSQP.solve!(m)
 @assert norm(qp.x - result.x) < tol
 
 # ==============================PORTFOLIO TESTCASE====================================
-n = 100
+n = 1000
 Q, q, A, b, C, d, A_osqp, l, u = porfolio(n)
 qp = QP(Q, q, A, b, C, d)
 m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
 result = OSQP.solve!(m)
-solve!(qp)
+solve!(qp, true)
 @assert norm(qp.x - result.x) < n * tol
