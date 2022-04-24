@@ -1,3 +1,4 @@
+using LinearAlgebra
 struct TOLERANCE
     aug_lag::Float64
     eq_feas::Float64
@@ -6,10 +7,10 @@ struct TOLERANCE
     max_iter::Int64
 
     function TOLERANCE()
-        aug_lag = 1e-8
-        eq_feas = 1e-4
-        ineq_feas = 1e-4
-        complementarity = 1e-4
+        aug_lag = 1e-12
+        eq_feas = 1e-3
+        ineq_feas = 1e-3
+        complementarity = 1e-3
         max_iter = 100
         new(aug_lag, eq_feas, ineq_feas, complementarity, max_iter)
     end
@@ -66,6 +67,6 @@ mutable struct QP
 
         tol = TOLERANCE()
         cache = CACHE(neq, nineq, n)
-        new(Q, q, A, b, C, d, At, Ct, Matrix(C), ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache, 0, typemax(Float64),typemax(Float64), typemax(Float64), typemax(Float64), false)
+        new(Q, q[:], A, b[:], C, d[:], At, Ct, Matrix(C), ∇L, ∇2L, Iρ, AtA, x, λ, μ, ρ, ϕ, tol, cache, 0, typemax(Float64), typemax(Float64), typemax(Float64), typemax(Float64), false)
     end
 end

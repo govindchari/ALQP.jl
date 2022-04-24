@@ -8,10 +8,10 @@ tol = 1e-3
 
 # ==============================KNOWN TESTCASE========================================
 n = 2
-Q = [1 0;0 1]
+Q = [1 0; 0 1]
 q = zeros(n)
 
-A = zeros(n,n)
+A = zeros(n, n)
 b = zeros(n)
 C = [1 1]
 d = [-5]
@@ -20,9 +20,9 @@ Q = sparse(Q)
 A = sparse(A)
 C = sparse(C)
 
-qp = QP(Q,q,A,b,C,d)
+qp = QP(Q, q, A, b, C, d)
 solve!(qp, false)
-@assert norm(qp.x-[-2.5;-2.5]) < tol
+@assert norm(qp.x - [-2.5; -2.5]) < tol
 
 # ==============================ALLOCATION TESTCASE====================================
 n = 10
@@ -40,4 +40,4 @@ m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
 solve!(qp, false)
 result = OSQP.solve!(m)
-@assert norm(qp.x-result.x) < tol
+@assert norm(qp.x - result.x) < tol
