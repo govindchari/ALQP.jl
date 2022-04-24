@@ -4,6 +4,8 @@ using SparseArrays
 using OSQP
 using BenchmarkTools
 
+include("portfolio.jl")
+
 tol = 1e-3
 
 # ==============================KNOWN TESTCASE========================================
@@ -41,3 +43,13 @@ OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
 solve!(qp, false)
 result = OSQP.solve!(m)
 @assert norm(qp.x - result.x) < tol
+
+# ==============================PORTFOLIO TESTCASE====================================
+n = 100
+Q, q, A, b, C, d, A_osqp, l, u = porfolio(n)
+qp = QP(Q, q, A, b, C, d)
+m = OSQP.Model()
+OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
+@btime OSQP.solve!($m)
+@btime solve!($qp)
+#println(norm(result.x-qp.x))
