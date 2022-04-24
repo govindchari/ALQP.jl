@@ -3,6 +3,8 @@ using BenchmarkTools
 using Printf
 using OSQP
 
+include("portfolio.jl")
+
 mutable struct QP
     # problem data
     Q::SparseMatrixCSC{Float64,Int64}
@@ -101,6 +103,8 @@ function solve!(qp::QP, verbose::Bool)
 end
 
 let
+    #===========================KNOWN TESTCASE===================================
+
     #=
     n = 2
     Q = [1 0;0 1]
@@ -121,7 +125,9 @@ let
 
     #@btime solve!($qp)
     
-    
+    # ============================ALLOCATION TESTCASE====================================
+
+    #=
     n = 10
     Q = randn(n, n)
     Q = Q' * Q
@@ -141,6 +147,22 @@ let
 
     println("ALQP Benchmark:")
     @btime solve!($qp)
-    
+    =#
 
+    #===========================PORTFOLIO TEST===================================
+    #=
+    N = 10
+
+    n_list = [2^i for i = 1:N]
+    naive_time = zeros(N)
+
+    for i = 1:N
+        Q, q, A, b, C, d, A_osqp, l, u = porfolio(n_list[i])
+        qp = QP(Q, q[:], A, b[:], C, d[:])
+        naive_time[i] = @belapsed solve!($qp)
+        println(i)
+    end
+
+    println(naive_time)
+    =#
 end
