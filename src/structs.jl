@@ -10,11 +10,11 @@ struct TOLERANCE
 
     function TOLERANCE()
         aug_lag = 1e-6
-        eq_feas = 1e-3
-        ineq_feas = 1e-3
-        complementarity = 1e-3
+        eq_feas = 1e-8
+        ineq_feas = 1e-8
+        complementarity = 1e-8
         max_iter = 100
-        max_aug_lag_iter = 100
+        max_aug_lag_iter = 1000
         new(aug_lag, eq_feas, ineq_feas, complementarity, max_iter, max_aug_lag_iter)
     end
 end
@@ -65,7 +65,7 @@ mutable struct QP
         AtA = A' * A
         ∇L = zeros(length(q))
         ∇2L = zeros(length(q), length(q))
-        ϕ = 1.0
+        ϕ = 10.0
         At = A'
         Ct = C'
 

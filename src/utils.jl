@@ -92,5 +92,5 @@ function check_convergence!(qp::QP)
         end
     end
     qp.ineq_res = norm(c.c_ineq)
-    qp.converged = (qp.eq_res <= length(qp.x) * qp.tol.eq_feas) && (qp.ineq_res <= length(qp.x) * qp.tol.ineq_feas) && (qp.complementarity_res <= length(qp.x) * qp.tol.complementarity)
+    qp.converged = (qp.eq_res <= length(qp.b) * qp.tol.eq_feas) && (qp.ineq_res <= length(qp.d) * qp.tol.ineq_feas) && (qp.complementarity_res <= length(qp.d) * qp.tol.complementarity)
 end
