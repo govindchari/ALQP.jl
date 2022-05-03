@@ -91,7 +91,7 @@ function solve!(qp::QP, verbose::Bool)
         println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
         println("-------------------------------------------------\n")
     end
-    for i = 1:500
+    for i = 1:70
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
         if (i%10 == 0)
@@ -104,32 +104,14 @@ function solve!(qp::QP, verbose::Bool)
     end
 end
 
-let 
-    n = 2
-    Q = [1 0; 0 1]
-    q = zeros(n)
-
-    A = zeros(n, n)
-    b = zeros(n)
-    C = [1 1]
-    d = [-5]
-
-    Q = sparse(Q)
-    A = sparse(A)
-    C = sparse(C)
-
-    qp = QP(Q, q, A, b, C, d)
-    solve!(qp, true)
-    @assert norm(qp.x - [-2.5; -2.5]) < tol
-    #=
-    n = 1000
+let
+    n = 1024
+    tol = 1e-3
     Q, q, A, b, C, d, A_osqp, l, u = porfolio(n)
     qp = QP(Q, q[:], A, b[:], C, d[:])
     m = OSQP.Model()
     OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
     result = OSQP.solve!(m)
-    solve!(qp, true)
-    #println(qp.x)
-    #println(result.x)  
-    =#
+    @time solve!(qp,true)
+    @assert norm(qp.x - result.x) < sqrt(n)*tol 
 end
