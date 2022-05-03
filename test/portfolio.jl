@@ -5,7 +5,7 @@ function porfolio(n::Int64)
     Q = rand(n, n)
     Q = Q' * Q + n * I(n)
     Q = sparse(Q)
-    q = rand(n, 1)
+    q = -rand(n, 1)
     A = ones(1, n)
     b = [1.0]
     C = -I(n)
