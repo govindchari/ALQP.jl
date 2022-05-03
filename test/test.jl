@@ -6,7 +6,7 @@ using BenchmarkTools
 
 include("portfolio.jl")
 
-tol = 1e-2
+tol = 2e-4
 
 # ==============================KNOWN TESTCASE========================================
 n = 2
@@ -24,7 +24,7 @@ C = sparse(C)
 
 qp = QP(Q, q, A, b, C, d)
 solve!(qp)
-@assert norm(qp.x - [-2.5; -2.5]) < tol
+@assert norm(qp.x - [-2.5; -2.5]) < sqrt(n)*tol
 
 # ==============================PORTFOLIO TESTCASE====================================
 n = 1000
@@ -34,7 +34,7 @@ m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
 result = OSQP.solve!(m)
 solve!(qp)
-@assert norm(qp.x - result.x) < tol
+@assert norm(qp.x - result.x) < sqrt(n)*tol
 
 # ==============================ALLOCATION TESTCASE====================================
 n = 10
@@ -52,4 +52,4 @@ m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
 solve!(qp)
 result = OSQP.solve!(m)
-@assert norm(qp.x - result.x) < tol
+@assert norm(qp.x - result.x) < sqrt(n)*tol
