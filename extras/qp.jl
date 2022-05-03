@@ -34,7 +34,7 @@ mutable struct QP
         Iρ = I(length(d))
         ∇L = zeros(length(q))
         ∇2L = zeros(length(q), length(q))
-        ϕ = 1.0
+        ϕ = 10.0
         aug_lag_tol = 1e-8
         new(Q, q, A, b, C, d, ∇L, ∇2L, Iρ, x, λ, μ, ρ, ϕ, aug_lag_tol)
     end
@@ -91,10 +91,12 @@ function solve!(qp::QP, verbose::Bool)
         println("iter     objv        gap       |Ax-b|    |Gx+s-h|\n")
         println("-------------------------------------------------\n")
     end
-    for i = 1:10
+    for i = 1:500
         minimize_augmented_lagrangian!(qp)
         update_dual!(qp)
-        update_penalty!(qp)
+        if (i%10 == 0)
+            update_penalty!(qp)
+        end
         if verbose
             logging(qp, i)
         end
@@ -102,15 +104,12 @@ function solve!(qp::QP, verbose::Bool)
     end
 end
 
-let
-    #===========================KNOWN TESTCASE===================================
-
-    #=
+let 
     n = 2
-    Q = [1 0;0 1]
+    Q = [1 0; 0 1]
     q = zeros(n)
 
-    A = zeros(n,n)
+    A = zeros(n, n)
     b = zeros(n)
     C = [1 1]
     d = [-5]
@@ -119,50 +118,18 @@ let
     A = sparse(A)
     C = sparse(C)
 
-    qp = QP(Q,q,A,b,C,d)
+    qp = QP(Q, q, A, b, C, d)
     solve!(qp, true)
-    =#
-
-    #@btime solve!($qp)
-    
-    # ============================ALLOCATION TESTCASE====================================
-
+    @assert norm(qp.x - [-2.5; -2.5]) < tol
     #=
-    n = 10
-    Q = randn(n, n)
-    Q = Q' * Q
-    Q = sparse(Q)
-    q = zeros(n)
-    A = spzeros(0, n)
-    b = []
-    G = sparse([I(n); -I(n)])
-    h = [ones(n); zeros(n)]
-
-    qp = QP(Q, q, A, b, G, h)
+    n = 1000
+    Q, q, A, b, C, d, A_osqp, l, u = porfolio(n)
+    qp = QP(Q, q[:], A, b[:], C, d[:])
     m = OSQP.Model()
-    OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
-    #Benchmarking
-    println("OSQP Benchmark:")
-    @btime OSQP.solve!($m)
-
-    println("ALQP Benchmark:")
-    @btime solve!($qp)
-    =#
-
-    #===========================PORTFOLIO TEST===================================
-    #=
-    N = 10
-
-    n_list = [2^i for i = 1:N]
-    naive_time = zeros(N)
-
-    for i = 1:N
-        Q, q, A, b, C, d, A_osqp, l, u = porfolio(n_list[i])
-        qp = QP(Q, q[:], A, b[:], C, d[:])
-        naive_time[i] = @belapsed solve!($qp)
-        println(i)
-    end
-
-    println(naive_time)
+    OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
+    result = OSQP.solve!(m)
+    solve!(qp, true)
+    #println(qp.x)
+    #println(result.x)  
     =#
 end
