@@ -1,6 +1,3 @@
-function initialize!(qp::QP)
-    update_derivatives!(qp)
-end
 function solve!(qp::QP)
     solve!(qp, false)
 end
