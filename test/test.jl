@@ -6,7 +6,17 @@ using BenchmarkTools
 
 include("portfolio.jl")
 
-tol = 2e-4
+tol = 1e-3
+
+# ==============================PORTFOLIO TESTCASE====================================
+n = 1000
+Q, q, A, b, C, d, A_osqp, l, u = porfolio(n)
+qp = QP(Q, q, A, b, C, d)
+m = OSQP.Model()
+OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
+result = OSQP.solve!(m)
+@time solve!(qp)
+@assert norm(qp.x - result.x) < sqrt(n)*tol
 
 # ==============================KNOWN TESTCASE========================================
 n = 2
@@ -23,18 +33,8 @@ A = sparse(A)
 C = sparse(C)
 
 qp = QP(Q, q, A, b, C, d)
-solve!(qp)
+@time solve!(qp)
 @assert norm(qp.x - [-2.5; -2.5]) < sqrt(n)*tol
-
-# ==============================PORTFOLIO TESTCASE====================================
-n = 1000
-Q, q, A, b, C, d, A_osqp, l, u = porfolio(n)
-qp = QP(Q, q, A, b, C, d)
-m = OSQP.Model()
-OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
-result = OSQP.solve!(m)
-solve!(qp)
-@assert norm(qp.x - result.x) < sqrt(n)*tol
 
 # ==============================ALLOCATION TESTCASE====================================
 n = 10
@@ -50,6 +50,6 @@ h = [ones(n); zeros(n)]
 qp = QP(Q, q, A, b, G, h)
 m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=sparse(I(10)), l=zeros(n), u=ones(n), verbose=false)
-solve!(qp)
+@time solve!(qp)
 result = OSQP.solve!(m)
 @assert norm(qp.x - result.x) < sqrt(n)*tol
