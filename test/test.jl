@@ -6,7 +6,7 @@ using BenchmarkTools
 
 include("portfolio.jl")
 
-tol = 1e-3
+tol = 1e-2
 
 # ==============================KNOWN TESTCASE========================================
 n = 2
@@ -34,7 +34,6 @@ m = OSQP.Model()
 OSQP.setup!(m; P=Q, q=q, A=A_osqp, l=l, u=u, verbose=false)
 result = OSQP.solve!(m)
 solve!(qp)
-println(norm(qp.x - result.x))
 @assert norm(qp.x - result.x) < tol
 
 # ==============================ALLOCATION TESTCASE====================================
