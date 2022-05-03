@@ -46,7 +46,7 @@ function update_derivatives!(qp::QP)
     mul!(c.c_n3, qp.Ct, c.c_ineq2)
 
     # qp.∇L .= qp.Q * qp.x + qp.q + qp.A' * (qp.λ + qp.ρ * (qp.A * qp.x - qp.b)) + qp.C' * (qp.μ + qp.Iρ * (qp.C * qp.x - qp.d))
-    @. qp.∇L = c.c_n1 + c.c_n2 + c.c_n3
+    @. qp.∇L = c.c_n1 + qp.q + c.c_n2 + c.c_n3
 
     #qp.∇2L
     # qp.C' * qp.Iρ * qp.C
